@@ -24,9 +24,9 @@ export default function Landing() {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-              See how AI understands
+              Measure your product's
               <br />
-              <span className="text-gradient">your product today</span>
+              <span className="text-gradient">AI perception</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
