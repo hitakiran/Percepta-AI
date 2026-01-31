@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/layout/Header";
-import { User, Bell, Palette, Save, Check } from "lucide-react";
+import { User, Bell, Save, Check } from "lucide-react";
 import { getUser, saveUser } from "@/lib/storage";
 import { toast } from "sonner";
 
@@ -19,8 +19,6 @@ export default function Settings() {
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
     autoSaveReports: true,
-    darkMode: false,
-    compactView: false,
   });
 
   const handleSaveProfile = () => {
@@ -118,45 +116,6 @@ export default function Settings() {
                 <Switch
                   checked={preferences.autoSaveReports}
                   onCheckedChange={(checked) => setPreferences({ ...preferences, autoSaveReports: checked })}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Appearance */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Palette className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Appearance</CardTitle>
-                  <CardDescription>Customize how the app looks</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Dark mode</p>
-                  <p className="text-sm text-muted-foreground">Use dark theme (coming soon)</p>
-                </div>
-                <Switch
-                  checked={preferences.darkMode}
-                  onCheckedChange={(checked) => setPreferences({ ...preferences, darkMode: checked })}
-                  disabled
-                />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Compact view</p>
-                  <p className="text-sm text-muted-foreground">Show more content in less space</p>
-                </div>
-                <Switch
-                  checked={preferences.compactView}
-                  onCheckedChange={(checked) => setPreferences({ ...preferences, compactView: checked })}
                 />
               </div>
             </CardContent>

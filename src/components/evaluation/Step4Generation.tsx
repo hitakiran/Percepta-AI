@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, Check, Clock, Database, MessageSquare, Cpu, BarChart3 } from "lucide-react";
+import { Activity, Check, Clock, Database, MessageSquare, Cpu, BarChart3, FileSearch, AlertTriangle } from "lucide-react";
 import type { TraceLog } from "@/types/project";
 import { cn } from "@/lib/utils";
 
@@ -14,18 +14,22 @@ interface Step4Props {
 
 const logIcons: Record<TraceLog['type'], typeof Activity> = {
   fetch: Database,
+  extract: FileSearch,
   prompt: MessageSquare,
   response: Cpu,
   score: BarChart3,
   complete: Check,
+  uncertainty: AlertTriangle,
 };
 
 const logColors: Record<TraceLog['type'], string> = {
   fetch: "text-blue-500 bg-blue-500/10",
+  extract: "text-cyan-500 bg-cyan-500/10",
   prompt: "text-purple-500 bg-purple-500/10",
   response: "text-green-500 bg-green-500/10",
   score: "text-amber-500 bg-amber-500/10",
   complete: "text-emerald-500 bg-emerald-500/10",
+  uncertainty: "text-orange-500 bg-orange-500/10",
 };
 
 export function Step4Generation({ traceLogs, isComplete, productName }: Step4Props) {
@@ -62,7 +66,7 @@ export function Step4Generation({ traceLogs, isComplete, productName }: Step4Pro
           )}
         </div>
         <p className="text-muted-foreground">
-          Watch AI models respond to your evaluation questions in real-time.
+          AI models are responding as uninformed potential buyers with no prior product exposure.
         </p>
       </div>
 
@@ -105,6 +109,11 @@ export function Step4Generation({ traceLogs, isComplete, productName }: Step4Pro
                           {log.model && (
                             <Badge variant="outline" className="text-xs">
                               {log.model}
+                            </Badge>
+                          )}
+                          {log.source && (
+                            <Badge variant="secondary" className="text-xs">
+                              {log.source}
                             </Badge>
                           )}
                           {log.duration && (

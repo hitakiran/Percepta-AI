@@ -5,9 +5,18 @@ export interface Project {
   websiteUrl: string;
   docsUrl?: string;
   pricingUrl?: string;
+  competitors: string[];
+  targetPersona: TargetPersona;
   createdAt: string;
   evaluationCount: number;
   lastScore?: number;
+}
+
+export interface TargetPersona {
+  role: string;
+  teamType: string;
+  companySize: string;
+  industry?: string;
 }
 
 export interface GoldenPrompt {
@@ -17,11 +26,17 @@ export interface GoldenPrompt {
   enabled: boolean;
 }
 
+export interface RubricCell {
+  score: number;
+  description: string;
+}
+
 export interface ScoringMetric {
   id: string;
   name: string;
   description: string;
   weight: number;
+  rubric: RubricCell[];
 }
 
 export interface ModelConfig {
@@ -35,11 +50,31 @@ export interface ModelConfig {
 export interface TraceLog {
   id: string;
   timestamp: string;
-  type: 'fetch' | 'prompt' | 'response' | 'score' | 'complete';
+  type: 'fetch' | 'extract' | 'prompt' | 'response' | 'score' | 'complete' | 'uncertainty';
   title: string;
   details: string;
   model?: string;
   duration?: number;
+  source?: string;
+}
+
+export interface ExtractedInfo {
+  category: string;
+  content: string;
+  source: string;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+export interface SourceFetch {
+  url: string;
+  status: 'success' | 'failed' | 'partial';
+  extractedInfo: ExtractedInfo[];
+}
+
+export interface DataUncertainty {
+  field: string;
+  issue: string;
+  impact: 'high' | 'medium' | 'low';
 }
 
 export interface ModelResponse {
@@ -47,11 +82,12 @@ export interface ModelResponse {
   modelName: string;
   response: string;
   score: number;
-  scores: {
-    accuracy: number;
-    featureCoverage: number;
-    differentiationClarity: number;
-  };
+  metricScores: {
+    metricId: string;
+    metricName: string;
+    score: number; // 0-3
+    reasoning: string;
+  }[];
   rubricDetails?: string;
 }
 
@@ -67,6 +103,7 @@ export interface Gap {
   type: 'missing' | 'incorrect' | 'weak' | 'hallucinated';
   title: string;
   description: string;
+  businessImpact: string;
   severity: 'high' | 'medium' | 'low';
   affectedQuestions: string[];
 }
@@ -93,6 +130,8 @@ export interface EvaluationReport {
   fixes: Fix[];
   summary: string;
   traceLogs: TraceLog[];
+  sourceFetches?: SourceFetch[];
+  uncertainties?: DataUncertainty[];
 }
 
 export interface EvaluationState {

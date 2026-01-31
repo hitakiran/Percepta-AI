@@ -4,18 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, AlertTriangle, CheckCircle2 } from "lucide-react";
-import type { QuestionResult } from "@/types/project";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, AlertTriangle, CheckCircle2, Eye } from "lucide-react";
+import type { QuestionResult, ScoringMetric } from "@/types/project";
 import { cn } from "@/lib/utils";
-import { ScoreBar } from "@/components/ScoreGauge";
+import { ScoreGauge } from "@/components/ScoreGauge";
 
 interface Step5Props {
   results: QuestionResult[];
+  metrics: ScoringMetric[];
+  overallScore: number;
   onNext: () => void;
   onBack: () => void;
 }
 
-export function Step5Results({ results, onNext, onBack }: Step5Props) {
+export function Step5Results({ results, metrics, overallScore, onNext, onBack }: Step5Props) {
   const [expandedQuestions, setExpandedQuestions] = useState<string[]>([]);
 
   const toggleQuestion = (id: string) => {
@@ -24,16 +27,21 @@ export function Step5Results({ results, onNext, onBack }: Step5Props) {
     );
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 0.8) return "text-score-excellent";
-    if (score >= 0.6) return "text-score-good";
-    if (score >= 0.4) return "text-score-warning";
-    return "text-score-danger";
+  const getScoreLevel = (score: number) => {
+    if (score >= 2.5) return 'excellent';
+    if (score >= 1.5) return 'good';
+    if (score >= 0.5) return 'warning';
+    return 'danger';
   };
 
-  const getAvgScore = (result: QuestionResult) => {
-    if (result.modelResponses.length === 0) return 0;
-    return result.modelResponses.reduce((sum, r) => sum + r.score, 0) / result.modelResponses.length;
+  const getScoreColor = (score: number) => {
+    const level = getScoreLevel(score);
+    switch (level) {
+      case 'excellent': return 'text-score-excellent';
+      case 'good': return 'text-score-good';
+      case 'warning': return 'text-score-warning';
+      default: return 'text-score-danger';
+    }
   };
 
   return (
@@ -41,14 +49,21 @@ export function Step5Results({ results, onNext, onBack }: Step5Props) {
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Question-by-Question Results</h1>
         <p className="text-muted-foreground">
-          Expand each question to see how different AI models responded and their scores.
+          Expand each question to see AI responses and scoring details.
         </p>
       </div>
+
+      {/* Overall Score Card */}
+      <Card className="mb-8 overflow-hidden">
+        <div className="bg-gradient-primary p-6 text-primary-foreground text-center">
+          <h2 className="text-lg font-medium mb-2">Overall Perception Score</h2>
+          <div className="text-5xl font-bold">{Math.round(overallScore * 100)}%</div>
+        </div>
+      </Card>
 
       <div className="space-y-4 mb-8">
         {results.map((result, index) => {
           const isExpanded = expandedQuestions.includes(result.questionId);
-          const avgScore = getAvgScore(result);
           
           return (
             <Card key={result.questionId} className="overflow-hidden">
@@ -64,22 +79,12 @@ export function Step5Results({ results, onNext, onBack }: Step5Props) {
                           <Badge variant="secondary" className="text-xs shrink-0">
                             {result.theme}
                           </Badge>
-                          {avgScore >= 0.7 ? (
-                            <CheckCircle2 className="w-4 h-4 text-score-good" />
-                          ) : avgScore >= 0.5 ? (
-                            <AlertTriangle className="w-4 h-4 text-score-warning" />
-                          ) : (
-                            <AlertTriangle className="w-4 h-4 text-score-danger" />
-                          )}
                         </div>
                         <CardTitle className="text-base font-medium">
                           {result.question}
                         </CardTitle>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className={cn("text-xl font-bold", getScoreColor(avgScore))}>
-                          {Math.round(avgScore * 100)}
-                        </span>
                         {isExpanded ? (
                           <ChevronUp className="w-5 h-5 text-muted-foreground" />
                         ) : (
@@ -98,25 +103,19 @@ export function Step5Results({ results, onNext, onBack }: Step5Props) {
                           {result.modelResponses.map((response) => (
                             <TabsTrigger key={response.modelId} value={response.modelId}>
                               {response.modelName}
-                              <span className={cn(
-                                "ml-2 text-xs font-bold",
-                                getScoreColor(response.score)
-                              )}>
-                                {Math.round(response.score * 100)}
-                              </span>
                             </TabsTrigger>
                           ))}
                         </TabsList>
                         
                         {result.modelResponses.map((response) => (
                           <TabsContent key={response.modelId} value={response.modelId}>
-                            <ModelResponseCard response={response} />
+                            <ModelResponseCard response={response} metrics={metrics} />
                           </TabsContent>
                         ))}
                       </Tabs>
                     ) : result.modelResponses[0] ? (
                       <div className="mt-4">
-                        <ModelResponseCard response={result.modelResponses[0]} />
+                        <ModelResponseCard response={result.modelResponses[0]} metrics={metrics} />
                       </div>
                     ) : (
                       <p className="text-muted-foreground py-4">No responses available</p>
@@ -146,8 +145,25 @@ export function Step5Results({ results, onNext, onBack }: Step5Props) {
   );
 }
 
-function ModelResponseCard({ response }: { response: QuestionResult['modelResponses'][0] }) {
+function ModelResponseCard({ response, metrics }: { response: QuestionResult['modelResponses'][0], metrics: ScoringMetric[] }) {
   const [showRubric, setShowRubric] = useState(false);
+
+  const getScoreLabel = (score: number) => {
+    switch (score) {
+      case 0: return '0 Points';
+      case 1: return '1 Point';
+      case 2: return '2 Points';
+      case 3: return '3 Points';
+      default: return `${score} Points`;
+    }
+  };
+
+  const getScoreBgColor = (score: number) => {
+    if (score >= 3) return 'bg-score-excellent/10 border-score-excellent/30';
+    if (score >= 2) return 'bg-score-good/10 border-score-good/30';
+    if (score >= 1) return 'bg-score-warning/10 border-score-warning/30';
+    return 'bg-score-danger/10 border-score-danger/30';
+  };
 
   return (
     <div className="space-y-4">
@@ -159,26 +175,67 @@ function ModelResponseCard({ response }: { response: QuestionResult['modelRespon
         <p className="text-sm leading-relaxed">{response.response}</p>
       </div>
       
-      <div className="grid grid-cols-3 gap-4">
-        <ScoreBar score={response.scores.accuracy} label="Accuracy" />
-        <ScoreBar score={response.scores.featureCoverage} label="Coverage" />
-        <ScoreBar score={response.scores.differentiationClarity} label="Clarity" />
-      </div>
-
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={() => setShowRubric(!showRubric)}
-        className="text-muted-foreground"
-      >
-        {showRubric ? 'Hide' : 'View'} Scoring Details
-      </Button>
-      
-      {showRubric && response.rubricDetails && (
-        <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-          {response.rubricDetails}
-        </div>
-      )}
+      <Dialog open={showRubric} onOpenChange={setShowRubric}>
+        <DialogTrigger asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            View Scoring Details
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Scoring Rubric Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            {response.metricScores.map((metricScore) => {
+              const metric = metrics.find(m => m.id === metricScore.metricId);
+              if (!metric) return null;
+              
+              return (
+                <div key={metricScore.metricId} className="border rounded-lg overflow-hidden">
+                  <div className="bg-secondary/50 p-3 flex items-center justify-between">
+                    <span className="font-medium">{metricScore.metricName}</span>
+                    <Badge className={cn(
+                      "text-xs",
+                      metricScore.score >= 2.5 ? "bg-score-excellent" :
+                      metricScore.score >= 1.5 ? "bg-score-good" :
+                      metricScore.score >= 0.5 ? "bg-score-warning" :
+                      "bg-score-danger"
+                    )}>
+                      {getScoreLabel(metricScore.score)}
+                    </Badge>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <div className="grid grid-cols-4 gap-2">
+                      {metric.rubric.map((cell) => (
+                        <div 
+                          key={cell.score}
+                          className={cn(
+                            "p-2 rounded text-xs border text-center",
+                            metricScore.score === cell.score 
+                              ? getScoreBgColor(cell.score) + " border-2 font-medium"
+                              : "bg-muted/30 border-transparent"
+                          )}
+                        >
+                          <div className="font-semibold mb-1">{cell.score} pts</div>
+                          <div className="text-muted-foreground">{cell.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      <strong>Reasoning:</strong> {metricScore.reasoning}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
