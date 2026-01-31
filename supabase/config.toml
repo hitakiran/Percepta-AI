@@ -1,0 +1,4 @@
+project_id = "nnzrmutzndkdojlpeetu"
+
+[functions.perception-audit]
+verify_jwt = false
