@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Search, BarChart3, Lightbulb, ArrowRight, CheckCircle2, Target, Eye, Zap } from "lucide-react";
+import { Brain, Search, BarChart3, Lightbulb, ArrowRight, CheckCircle2, Target, Eye, Zap, FileSearch, MessageSquare, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 
@@ -20,7 +20,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
               <Brain className="w-4 h-4" />
-              AI Perception Analysis Tool
+              AI Perception Measurement Platform
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
@@ -30,8 +30,7 @@ export default function Landing() {
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Discover what AI systems say about your product. Identify gaps, inaccuracies, 
-              and weak positioning—then get clear, actionable fixes.
+              <strong>Percepta AI</strong> shows you exactly how AI systems describe your product to potential buyers—and what to fix when they get it wrong.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -60,9 +59,9 @@ export default function Landing() {
       <section className="py-20 bg-card border-y">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What This Product Does</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Percepta AI Does</h2>
             <p className="text-lg text-muted-foreground">
-              A web app that shows how AI understands your product today — and what's missing for it to understand you correctly.
+              A B2B tool that audits how AI models perceive your product—and gives you a clear roadmap to improve it.
             </p>
           </div>
 
@@ -74,7 +73,7 @@ export default function Landing() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">See AI Perception</h3>
                 <p className="text-muted-foreground text-sm">
-                  Run buyer-style questions through multiple LLMs and see exactly how they describe your product.
+                  Ask AI models buyer-style questions about your product and see exactly what they say—as an uninformed potential customer would.
                 </p>
               </CardContent>
             </Card>
@@ -86,7 +85,7 @@ export default function Landing() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Identify Gaps</h3>
                 <p className="text-muted-foreground text-sm">
-                  Spot missing information, incorrect descriptions, weak differentiators, and hallucinated content.
+                  Spot missing information, incorrect descriptions, weak differentiators, and hallucinated content that hurts your positioning.
                 </p>
               </CardContent>
             </Card>
@@ -98,7 +97,7 @@ export default function Landing() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Get Fixes</h3>
                 <p className="text-muted-foreground text-sm">
-                  Receive specific, actionable recommendations to improve how AI explains your product.
+                  Receive specific, actionable recommendations to improve your product context, explainability, positioning, and roadmap communication.
                 </p>
               </CardContent>
             </Card>
@@ -110,29 +109,32 @@ export default function Landing() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How Percepta AI Works</h2>
             <p className="text-lg text-muted-foreground">
-              A structured, transparent evaluation process in 7 steps
+              A structured, transparent evaluation process in 8 steps
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto">
             <div className="grid gap-6">
               {[
-                { step: 1, title: "Enter Product Info", desc: "Provide your website URL and optional documentation links" },
-                { step: 2, title: "Customize Questions", desc: "Review and edit 8 AI-generated 'Golden Questions' based on your product" },
-                { step: 3, title: "Select Models", desc: "Choose which LLMs to query (Gemini, GPT-5, etc.)" },
-                { step: 4, title: "Watch Generation", desc: "See live trace logs as AI queries run with full transparency" },
-                { step: 5, title: "Review Results", desc: "Analyze question-by-question responses with detailed scoring" },
-                { step: 6, title: "Identify Gaps", desc: "See categorized failures: missing info, incorrect facts, hallucinations" },
-                { step: 7, title: "Apply Fixes", desc: "Get grouped, actionable recommendations to improve your content" },
+                { step: 1, title: "Enter Product Info", desc: "Provide your website URL, competitors, and target persona", icon: FileSearch },
+                { step: 2, title: "Review Source Trace", desc: "See what public data was fetched and any uncertainties before proceeding", icon: Search },
+                { step: 3, title: "Customize Questions", desc: "Edit auto-generated questions specific to your product and competitors", icon: MessageSquare },
+                { step: 4, title: "Set Scoring Rubric", desc: "Define how responses are scored with an editable 0-3 point rubric", icon: BarChart3 },
+                { step: 5, title: "Select Models", desc: "Choose which AI models to query and set temperature", icon: Brain },
+                { step: 6, title: "Watch Generation", desc: "See live trace logs as models respond as uninformed buyers", icon: Zap },
+                { step: 7, title: "Review Results", desc: "Analyze responses with overall scores and detailed rubric views", icon: Eye },
+                { step: 8, title: "Apply Fixes", desc: "Get grouped recommendations to improve your AI perception", icon: TrendingUp },
               ].map((item) => (
                 <div key={item.step} className="flex gap-4 items-start">
                   <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">
                     {item.step}
                   </div>
-                  <div className="pt-1">
-                    <h3 className="font-semibold mb-1">{item.title}</h3>
+                  <div className="pt-1 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold">{item.title}</h3>
+                    </div>
                     <p className="text-muted-foreground text-sm">{item.desc}</p>
                   </div>
                 </div>
@@ -146,9 +148,9 @@ export default function Landing() {
       <section className="py-20 bg-card border-y">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Your Business Needs This</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Your Business Needs Percepta AI</h2>
             <p className="text-lg text-muted-foreground">
-              AI tools are shaping how buyers discover and evaluate products
+              AI tools are shaping how buyers discover and evaluate products—often before they ever visit your website
             </p>
           </div>
 
@@ -156,7 +158,7 @@ export default function Landing() {
             {[
               "Product teams can't control how AI describes their product",
               "AI responses influence buying decisions before users visit your site",
-              "Incorrect positioning means lost opportunities",
+              "Incorrect positioning means lost opportunities to competitors",
               "Outdated information erodes trust in your brand",
               "Missing features in AI responses hurt conversions",
               "Competitors may be better represented in AI outputs",
@@ -174,7 +176,7 @@ export default function Landing() {
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to audit your AI perception?
+            Ready to measure your AI perception?
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
             See exactly how AI understands your product and get actionable fixes in minutes.
@@ -193,7 +195,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>AI Product Perception Auditor • Built for Hackathon Demo</p>
+          <p><strong>Percepta AI</strong> • AI Product Perception Measurement Platform</p>
         </div>
       </footer>
     </div>

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, AlertTriangle, XCircle, Search, Ghost } from "lucide-react";
+import { ArrowRight, ArrowLeft, AlertTriangle, XCircle, Search, Ghost, Info } from "lucide-react";
 import type { Gap } from "@/types/project";
 import { cn } from "@/lib/utils";
 
@@ -11,11 +11,31 @@ interface Step6Props {
   onBack: () => void;
 }
 
-const gapTypeConfig: Record<Gap['type'], { icon: typeof AlertTriangle; label: string; color: string }> = {
-  missing: { icon: Search, label: 'Missing Information', color: 'text-blue-500 bg-blue-500/10' },
-  incorrect: { icon: XCircle, label: 'Incorrect Description', color: 'text-score-danger bg-score-danger/10' },
-  weak: { icon: AlertTriangle, label: 'Weak Differentiator', color: 'text-score-warning bg-score-warning/10' },
-  hallucinated: { icon: Ghost, label: 'Hallucinated Content', color: 'text-purple-500 bg-purple-500/10' },
+const gapTypeConfig: Record<Gap['type'], { icon: typeof AlertTriangle; label: string; color: string; description: string }> = {
+  missing: { 
+    icon: Search, 
+    label: 'Missing Information', 
+    color: 'text-blue-500 bg-blue-500/10',
+    description: 'Key product information that AI models could not find or did not include in their responses.'
+  },
+  incorrect: { 
+    icon: XCircle, 
+    label: 'Incorrect Description', 
+    color: 'text-score-danger bg-score-danger/10',
+    description: 'Factually wrong or misleading information that could misinform potential buyers.'
+  },
+  weak: { 
+    icon: AlertTriangle, 
+    label: 'Weak Differentiator', 
+    color: 'text-score-warning bg-score-warning/10',
+    description: 'Your competitive advantages are not being clearly communicated or explained.'
+  },
+  hallucinated: { 
+    icon: Ghost, 
+    label: 'Hallucinated Content', 
+    color: 'text-purple-500 bg-purple-500/10',
+    description: 'Made-up features, pricing, or capabilities that don\'t exist in your product.'
+  },
 };
 
 export function Step6Gaps({ gaps, onNext, onBack }: Step6Props) {
@@ -39,7 +59,7 @@ export function Step6Gaps({ gaps, onNext, onBack }: Step6Props) {
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2">Gaps & Failures</h1>
         <p className="text-muted-foreground">
-          These issues were identified in how AI models describe your product.
+          Detailed analysis of issues identified in how AI models describe your product to potential buyers.
         </p>
       </div>
 
@@ -70,14 +90,17 @@ export function Step6Gaps({ gaps, onNext, onBack }: Step6Props) {
                     <div className={cn("p-2 rounded-lg", config.color)}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <CardTitle className="text-lg">{config.label}</CardTitle>
                       <CardDescription>{typeGaps.length} issue{typeGaps.length !== 1 ? 's' : ''} found</CardDescription>
                     </div>
                   </div>
+                  <p className="text-sm text-muted-foreground mt-2 ml-12">
+                    {config.description}
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {typeGaps.map((gap) => (
                       <div 
                         key={gap.id}
@@ -86,7 +109,7 @@ export function Step6Gaps({ gaps, onNext, onBack }: Step6Props) {
                           getSeverityColor(gap.severity)
                         )}
                       >
-                        <div className="flex items-start justify-between gap-4 mb-2">
+                        <div className="flex items-start justify-between gap-4 mb-3">
                           <h4 className="font-medium">{gap.title}</h4>
                           <Badge 
                             variant="outline" 
@@ -95,12 +118,27 @@ export function Step6Gaps({ gaps, onNext, onBack }: Step6Props) {
                               getSeverityColor(gap.severity)
                             )}
                           >
-                            {gap.severity}
+                            {gap.severity} severity
                           </Badge>
                         </div>
-                        <p className="text-sm opacity-80">{gap.description}</p>
+                        <p className="text-sm opacity-80 mb-3">{gap.description}</p>
+                        
+                        {/* Business Impact */}
+                        <div className="p-3 rounded bg-background/50 border border-dashed">
+                          <div className="flex items-start gap-2">
+                            <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                                Why This Matters
+                              </p>
+                              <p className="text-sm">{gap.businessImpact}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
                         {gap.affectedQuestions.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-1">
+                            <span className="text-xs text-muted-foreground mr-1">Affected questions:</span>
                             {gap.affectedQuestions.map((q, i) => (
                               <Badge key={i} variant="secondary" className="text-xs">
                                 Q{i + 1}

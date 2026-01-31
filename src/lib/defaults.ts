@@ -1,26 +1,130 @@
-import type { GoldenPrompt, ScoringMetric, ModelConfig } from '@/types/project';
+import type { GoldenPrompt, ScoringMetric, ModelConfig, RubricCell } from '@/types/project';
 
-export const DEFAULT_GOLDEN_PROMPTS: GoldenPrompt[] = [
-  { id: '1', question: 'What is this product and what does it do?', theme: 'Core Positioning', enabled: true },
-  { id: '2', question: 'Who is the primary target user for this product?', theme: 'Target Audience', enabled: true },
-  { id: '3', question: 'What are the main use cases for this product?', theme: 'Use Cases', enabled: true },
-  { id: '4', question: 'What constraints or limitations does this product have?', theme: 'Constraints', enabled: true },
-  { id: '5', question: 'How does this product scale for different team sizes?', theme: 'Scalability', enabled: true },
-  { id: '6', question: 'What makes this product different from competitors?', theme: 'Differentiation', enabled: true },
-  { id: '7', question: 'What is the pricing model for this product?', theme: 'Pricing', enabled: true },
-  { id: '8', question: 'When should someone NOT use this product?', theme: 'Anti-use Cases', enabled: true },
-];
+// These are GENERATED based on product/competitor inputs, not static defaults
+export const DEFAULT_GOLDEN_PROMPTS: GoldenPrompt[] = [];
 
 export const DEFAULT_SCORING_METRICS: ScoringMetric[] = [
-  { id: '1', name: 'Accuracy', description: 'How factually correct is the response compared to official product information?', weight: 0.35 },
-  { id: '2', name: 'Feature Coverage', description: 'Does the response mention key features and capabilities correctly?', weight: 0.30 },
-  { id: '3', name: 'Differentiation Clarity', description: 'How clearly does the response distinguish this product from alternatives?', weight: 0.20 },
-  { id: '4', name: 'Recency', description: 'Is the information current or does it reference outdated features/pricing?', weight: 0.15 },
+  { 
+    id: '1', 
+    name: 'Attribution', 
+    description: 'Does the AI mention and recommend your product?', 
+    weight: 0.35,
+    rubric: [
+      { score: 0, description: 'Mentions no brand.' },
+      { score: 1, description: 'Mentions others only.' },
+      { score: 2, description: 'Mentions your product + others.' },
+      { score: 3, description: 'Your product is the primary recommendation.' },
+    ]
+  },
+  { 
+    id: '2', 
+    name: 'Accuracy', 
+    description: 'How factually correct is the information provided?', 
+    weight: 0.30,
+    rubric: [
+      { score: 0, description: 'Factually wrong.' },
+      { score: 1, description: 'Generic/Outdated info.' },
+      { score: 2, description: 'Correct but missing nuance.' },
+      { score: 3, description: 'Includes latest "Golden Set" specs.' },
+    ]
+  },
+  { 
+    id: '3', 
+    name: 'Differentiation', 
+    description: 'How clearly does it distinguish your product from alternatives?', 
+    weight: 0.35,
+    rubric: [
+      { score: 0, description: 'Says everyone is the same.' },
+      { score: 1, description: 'Lists your product features.' },
+      { score: 2, description: 'Explains an advantage of your product.' },
+      { score: 3, description: 'Explains why your product is better than others.' },
+    ]
+  },
 ];
 
 export const AVAILABLE_MODELS: ModelConfig[] = [
-  { id: 'gemini-flash', name: 'Gemini 3 Flash', provider: 'Google', enabled: true, temperature: 0.7 },
+  { id: 'gemini-flash', name: 'Gemini 2.5 Flash', provider: 'Google', enabled: true, temperature: 0.7 },
   { id: 'gemini-pro', name: 'Gemini 2.5 Pro', provider: 'Google', enabled: false, temperature: 0.7 },
   { id: 'gpt5-mini', name: 'GPT-5 Mini', provider: 'OpenAI', enabled: true, temperature: 0.7 },
   { id: 'gpt5', name: 'GPT-5', provider: 'OpenAI', enabled: false, temperature: 0.7 },
 ];
+
+// Helper to generate questions based on product info
+export function generateGoldenPrompts(
+  productName: string, 
+  competitors: string[], 
+  persona: { role: string; teamType: string; companySize: string }
+): GoldenPrompt[] {
+  const prompts: GoldenPrompt[] = [];
+  let id = 1;
+  
+  // Core positioning questions
+  prompts.push({
+    id: String(id++),
+    question: `What is ${productName} and what core problem does it solve?`,
+    theme: 'Core Positioning',
+    enabled: true,
+  });
+  
+  // Competitor comparison questions
+  if (competitors.length > 0) {
+    competitors.forEach(competitor => {
+      prompts.push({
+        id: String(id++),
+        question: `How does ${productName} compare to ${competitor}?`,
+        theme: 'Competitor Comparison',
+        enabled: true,
+      });
+    });
+  }
+  
+  // Persona-specific questions
+  prompts.push({
+    id: String(id++),
+    question: `Why would a ${persona.role} at a ${persona.companySize} ${persona.teamType} team choose ${productName}?`,
+    theme: 'Target Persona Fit',
+    enabled: true,
+  });
+  
+  // Feature value questions
+  prompts.push({
+    id: String(id++),
+    question: `What are the most valuable features of ${productName} and why do they matter?`,
+    theme: 'Feature Value',
+    enabled: true,
+  });
+  
+  // Use case questions
+  prompts.push({
+    id: String(id++),
+    question: `What are the best use cases for ${productName}?`,
+    theme: 'Use Cases',
+    enabled: true,
+  });
+  
+  // Limitations
+  prompts.push({
+    id: String(id++),
+    question: `What are the limitations or constraints of ${productName}?`,
+    theme: 'Constraints',
+    enabled: true,
+  });
+  
+  // Pricing
+  prompts.push({
+    id: String(id++),
+    question: `What is the pricing model for ${productName} and is it good value?`,
+    theme: 'Pricing',
+    enabled: true,
+  });
+  
+  // Anti-use case
+  prompts.push({
+    id: String(id++),
+    question: `When should someone NOT use ${productName}?`,
+    theme: 'Anti-use Cases',
+    enabled: true,
+  });
+  
+  return prompts;
+}
