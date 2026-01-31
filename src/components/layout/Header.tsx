@@ -66,9 +66,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-1">
-          <span className="text-3xl font-bold text-primary">&gt;</span>
-          <span className="font-bold text-lg">Percepta AI</span>
+        <Link to="/" className="flex items-center">
+          <span className="text-3xl font-bold text-primary leading-none">&gt;</span>
+          <span className="font-bold text-lg leading-none ml-1">Percepta AI</span>
         </Link>
 
         {/* Desktop Navigation */}
