@@ -23,14 +23,14 @@ interface AuditInput {
 }
 
 async function queryAI(prompt: string, apiKey: string): Promise<string> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://api.keywordsai.co/api/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "You are a potential buyer researching products. Answer questions based on your general knowledge. Be concise and direct." },
         { role: "user", content: prompt }
@@ -113,9 +113,9 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const KEYWORDS_AI_KEY = Deno.env.get("keywordsai");
+    if (!KEYWORDS_AI_KEY) {
+      throw new Error("keywordsai secret is not configured");
     }
 
     const input: AuditInput = await req.json();
@@ -129,7 +129,7 @@ serve(async (req) => {
     for (const q of GOLDEN_QUESTIONS) {
       const prompt = `As someone researching "${productName}" (website: ${productUrl}), ${q.question}`;
       console.log(`Querying: ${q.type}`);
-      const response = await queryAI(prompt, LOVABLE_API_KEY);
+      const response = await queryAI(prompt, KEYWORDS_AI_KEY);
       responses.push({
         question: q.question,
         type: q.type,
@@ -145,7 +145,7 @@ serve(async (req) => {
       competitors, 
       targetPersona, 
       responses, 
-      LOVABLE_API_KEY
+      KEYWORDS_AI_KEY
     );
 
     // Build the report
