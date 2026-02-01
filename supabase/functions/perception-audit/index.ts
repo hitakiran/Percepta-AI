@@ -25,14 +25,14 @@ interface AuditInput {
 }
 
 const SUPPORTED_MODELS = ["gpt-4o-mini", "gpt-5-mini"];
-const DEFAULT_MODEL = "gpt-5-mini";
+const DEFAULT_MODEL = "gpt-4o-mini";
 
-function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL): Promise<string> {
-  return fetch("https://api.keywordsai.co/api/chat/completions", {
+async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL): Promise<string> {
+  const response = await fetch("https://api.keywordsai.co/api/chat/completions", {
     method: "POST",
     headers: {
+      Authorization: "Bearer YOUR_KEYWORDS_AI_API_KEY",
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: model,
@@ -45,17 +45,16 @@ function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL):
         { role: "user", content: prompt },
       ],
     }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.text().then((errorText) => {
-          console.error("AI API error:", response.status, errorText);
-          throw new Error(`AI API error: ${response.status}`);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => data.choices?.[0]?.message?.content || "No response generated");
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("AI API error:", response.status, errorText);
+    throw new Error(`AI API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "No response generated";
 }
 
 async function analyzeResponses(
