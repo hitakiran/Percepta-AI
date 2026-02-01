@@ -20,9 +20,13 @@ interface AuditInput {
   productUrl: string;
   competitors?: string;
   targetPersona: string;
+  model?: string;
 }
 
-async function queryAI(prompt: string, apiKey: string): Promise<string> {
+const SUPPORTED_MODELS = ["gpt-4o-mini", "gpt-5-mini"];
+const DEFAULT_MODEL = "gpt-5-mini";
+
+async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL): Promise<string> {
   const response = await fetch("https://api.keywordsai.co/api/chat/completions", {
     method: "POST",
     headers: {
@@ -30,7 +34,7 @@ async function queryAI(prompt: string, apiKey: string): Promise<string> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: model,
       messages: [
         { role: "system", content: "You are a potential buyer researching products. Answer questions based on your general knowledge. Be concise and direct." },
         { role: "user", content: prompt }
@@ -119,9 +123,11 @@ serve(async (req) => {
     }
 
     const input: AuditInput = await req.json();
-    const { productName, productUrl, competitors = "", targetPersona } = input;
+    const { productName, productUrl, competitors = "", targetPersona, model } = input;
 
-    console.log(`Starting perception audit for: ${productName}`);
+    // Validate and select model
+    const selectedModel = model && SUPPORTED_MODELS.includes(model) ? model : DEFAULT_MODEL;
+    console.log(`Starting perception audit for: ${productName} using model: ${selectedModel}`);
 
     // Query AI for each golden question
     const responses: { question: string; type: string; response: string }[] = [];
@@ -129,7 +135,7 @@ serve(async (req) => {
     for (const q of GOLDEN_QUESTIONS) {
       const prompt = `As someone researching "${productName}" (website: ${productUrl}), ${q.question}`;
       console.log(`Querying: ${q.type}`);
-      const response = await queryAI(prompt, KEYWORDS_AI_KEY);
+      const response = await queryAI(prompt, KEYWORDS_AI_KEY, selectedModel);
       responses.push({
         question: q.question,
         type: q.type,
