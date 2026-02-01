@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const GOLDEN_QUESTIONS = [
@@ -23,8 +24,8 @@ interface AuditInput {
   model?: string;
 }
 
-const SUPPORTED_MODELS = ["openai/gpt-4o-mini", "openai/gpt-5-mini"];
-const DEFAULT_MODEL = "openai/gpt-5-mini";
+const SUPPORTED_MODELS = ["gpt-4o-mini", "gpt-5-mini"];
+const DEFAULT_MODEL = "gpt-4o-mini";
 
 async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL): Promise<string> {
   const response = await fetch("https://api.keywordsai.co/api/chat/completions", {
@@ -36,8 +37,12 @@ async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_M
     body: JSON.stringify({
       model: model,
       messages: [
-        { role: "system", content: "You are a potential buyer researching products. Answer questions based on your general knowledge. Be concise and direct." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are a potential buyer researching products. Answer questions based on your general knowledge. Be concise and direct.",
+        },
+        { role: "user", content: prompt },
       ],
     }),
   });
@@ -53,21 +58,25 @@ async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_M
 }
 
 async function analyzeResponses(
-  productName: string, 
-  productUrl: string, 
+  productName: string,
+  productUrl: string,
   competitors: string,
   targetPersona: string,
   responses: { question: string; type: string; response: string }[],
-  apiKey: string
+  apiKey: string,
 ): Promise<any> {
   const analysisPrompt = `You are an expert product marketing analyst. Analyze these AI-generated responses about "${productName}" (${productUrl}).
 
 Target Persona: ${targetPersona}
-${competitors ? `Competitors: ${competitors}` : ''}
+${competitors ? `Competitors: ${competitors}` : ""}
 
 AI Responses:
-${responses.map((r, i) => `${i + 1}. ${r.type}: "${r.question}"
-Response: ${r.response}`).join('\n\n')}
+${responses
+  .map(
+    (r, i) => `${i + 1}. ${r.type}: "${r.question}"
+Response: ${r.response}`,
+  )
+  .join("\n\n")}
 
 Provide a JSON analysis with:
 1. For each response, score (0-1) for: accuracy, featureCoverage, differentiationClarity
@@ -100,20 +109,20 @@ Return ONLY valid JSON in this exact structure:
 }`;
 
   const analysisResponse = await queryAI(analysisPrompt, apiKey);
-  
+
   // Extract JSON from the response
   const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     console.error("Failed to extract JSON from analysis:", analysisResponse);
     throw new Error("Failed to parse analysis response");
   }
-  
+
   return JSON.parse(jsonMatch[0]);
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
@@ -131,7 +140,7 @@ serve(async (req) => {
 
     // Query AI for each golden question
     const responses: { question: string; type: string; response: string }[] = [];
-    
+
     for (const q of GOLDEN_QUESTIONS) {
       const prompt = `As someone researching "${productName}" (website: ${productUrl}), ${q.question}`;
       console.log(`Querying: ${q.type}`);
@@ -146,12 +155,12 @@ serve(async (req) => {
     // Analyze all responses
     console.log("Analyzing responses...");
     const analysis = await analyzeResponses(
-      productName, 
-      productUrl, 
-      competitors, 
-      targetPersona, 
-      responses, 
-      KEYWORDS_AI_KEY
+      productName,
+      productUrl,
+      competitors,
+      targetPersona,
+      responses,
+      KEYWORDS_AI_KEY,
     );
 
     // Build the report
@@ -164,7 +173,11 @@ serve(async (req) => {
         question: r.question,
         questionType: r.type,
         response: r.response,
-        scores: analysis.questionAnalysis[i]?.scores || { accuracy: 0.5, featureCoverage: 0.5, differentiationClarity: 0.5 },
+        scores: analysis.questionAnalysis[i]?.scores || {
+          accuracy: 0.5,
+          featureCoverage: 0.5,
+          differentiationClarity: 0.5,
+        },
         risks: analysis.questionAnalysis[i]?.risks || [],
       })),
       detectedGaps: analysis.detectedGaps || [],
@@ -178,7 +191,6 @@ serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
   } catch (error) {
     console.error("Perception audit error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
