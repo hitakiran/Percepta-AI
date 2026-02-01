@@ -16,6 +16,7 @@ import { ArrowRight } from "lucide-react";
 import { DEFAULT_SCORING_METRICS, AVAILABLE_MODELS, generateGoldenPrompts } from "@/lib/defaults";
 import { getProjects, saveProject, saveReport, getProjectReports } from "@/lib/storage";
 import { supabase } from "@/integrations/supabase/client";
+import { runPerceptionAudit } from "@/lib/audit-service";
 import { toast } from "sonner";
 import type { 
   Project, 
@@ -210,18 +211,20 @@ export default function Evaluate() {
         details: 'Setting up models to respond as uninformed buyers with no prior product exposure.',
       });
 
-      const { data, error } = await supabase.functions.invoke('perception-audit', {
-        body: {
-          productName: productData.name,
-          productUrl: productData.websiteUrl,
-          competitors: productData.competitors.join(', '),
-          targetPersona: `${productData.targetPersona.role} at a ${productData.targetPersona.companySize} ${productData.targetPersona.teamType} team`,
-          customPrompts: enabledPrompts.map(p => ({ question: p.question, theme: p.theme })),
-        }
+      const { data, error } = await runPerceptionAudit({
+        productName: productData.name,
+        productUrl: productData.websiteUrl,
+        competitors: productData.competitors.join(', '),
+        targetPersona: `${productData.targetPersona.role} at a ${productData.targetPersona.companySize} ${productData.targetPersona.teamType} team`,
+        customPrompts: enabledPrompts.map(p => ({ question: p.question, theme: p.theme })),
       });
 
       if (error) {
-        throw error;
+        throw new Error(error);
+      }
+      
+      if (!data) {
+        throw new Error("No data returned from audit service");
       }
 
       // Simulate trace logs for each question

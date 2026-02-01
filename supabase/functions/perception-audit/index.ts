@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,11 +27,13 @@ interface AuditInput {
 const SUPPORTED_MODELS = ["gpt-4o-mini", "gpt-5-mini"];
 const DEFAULT_MODEL = "gpt-4o-mini";
 
-async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL): Promise<string> {
+const YOUR_KEYWORDS_AI_API_KEY = "GzxLxK9p.qNapLjutHCn87fo4UJVX0xhLCSuLRe9F";
+
+async function queryAI(prompt: string, model: string = DEFAULT_MODEL): Promise<string> {
   const response = await fetch("https://api.keywordsai.co/api/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: "Bearer ${apiKey}",
+      Authorization: `Bearer ${YOUR_KEYWORDS_AI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -63,7 +65,6 @@ async function analyzeResponses(
   competitors: string,
   targetPersona: string,
   responses: { question: string; type: string; response: string }[],
-  apiKey: string,
 ): Promise<any> {
   const analysisPrompt = `You are an expert product marketing analyst. Analyze these AI-generated responses about "${productName}" (${productUrl}).
 
@@ -108,7 +109,7 @@ Return ONLY valid JSON in this exact structure:
   ]
 }`;
 
-  const analysisResponse = await queryAI(analysisPrompt, apiKey);
+  const analysisResponse = await queryAI(analysisPrompt);
 
   // Extract JSON from the response
   const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
@@ -120,18 +121,15 @@ Return ONLY valid JSON in this exact structure:
   return JSON.parse(jsonMatch[0]);
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+async function main() {
+  const input: AuditInput = {
+    productName: "Keywords AI",
+    productUrl: "https://keywordsai.co",
+    targetPersona: "Developer",
+    model: "gpt-4o-mini"
+  };
 
   try {
-    const KEYWORDS_AI_KEY = Deno.env.get("keywordsai");
-    if (!KEYWORDS_AI_KEY) {
-      throw new Error("keywordsai secret is not configured");
-    }
-
-    const input: AuditInput = await req.json();
     const { productName, productUrl, competitors = "", targetPersona, model } = input;
 
     // Validate and select model
@@ -144,7 +142,7 @@ serve(async (req) => {
     for (const q of GOLDEN_QUESTIONS) {
       const prompt = `As someone researching "${productName}" (website: ${productUrl}), ${q.question}`;
       console.log(`Querying: ${q.type}`);
-      const response = await queryAI(prompt, KEYWORDS_AI_KEY, selectedModel);
+      const response = await queryAI(prompt, selectedModel);
       responses.push({
         question: q.question,
         type: q.type,
@@ -160,7 +158,6 @@ serve(async (req) => {
       competitors,
       targetPersona,
       responses,
-      KEYWORDS_AI_KEY,
     );
 
     // Build the report
@@ -186,17 +183,11 @@ serve(async (req) => {
     };
 
     console.log("Audit complete:", report.runId);
+    console.log(JSON.stringify(report, null, 2));
 
-    return new Response(JSON.stringify(report), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (error) {
     console.error("Perception audit error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   }
-});
+}
+
+main();
