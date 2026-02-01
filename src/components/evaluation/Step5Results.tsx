@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, AlertTriangle, CheckCircle2, Eye } from "lucide-react";
+import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, AlertTriangle, CheckCircle2, Eye, Brain } from "lucide-react";
 import type { QuestionResult, ScoringMetric } from "@/types/project";
 import { cn } from "@/lib/utils";
 import { ScoreGauge } from "@/components/ScoreGauge";
@@ -14,11 +14,12 @@ interface Step5Props {
   results: QuestionResult[];
   metrics: ScoringMetric[];
   overallScore: number;
+  summary: string;
   onNext: () => void;
   onBack: () => void;
 }
 
-export function Step5Results({ results, metrics, overallScore, onNext, onBack }: Step5Props) {
+export function Step5Results({ results, metrics, overallScore, summary, onNext, onBack }: Step5Props) {
   const [expandedQuestions, setExpandedQuestions] = useState<string[]>([]);
 
   const toggleQuestion = (id: string) => {
@@ -52,6 +53,19 @@ export function Step5Results({ results, metrics, overallScore, onNext, onBack }:
           Expand each question to see AI responses and scoring details.
         </p>
       </div>
+
+      {/* Summary Card */}
+      <Card className="mb-8 border-primary/20 bg-primary/5">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-primary" />
+            <CardTitle className="text-lg">Executive Summary</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-base leading-relaxed">{summary}</p>
+        </CardContent>
+      </Card>
 
       {/* Overall Score Card */}
       <Card className="mb-8 overflow-hidden">

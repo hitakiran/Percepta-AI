@@ -10,6 +10,7 @@ import { getProjects, getProjectReports } from "@/lib/storage";
 import type { Project, EvaluationReport } from "@/types/project";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function Reports() {
   const { projectId } = useParams();
@@ -56,17 +57,17 @@ export default function Reports() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gradient-surface">
+      <PageTransition className="min-h-screen bg-gradient-surface">
         <Header />
         <main className="container mx-auto px-4 py-8">
           <p className="text-muted-foreground">Project not found</p>
         </main>
-      </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-surface">
+    <PageTransition className="min-h-screen bg-gradient-surface">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
@@ -158,13 +159,11 @@ export default function Reports() {
                       <TableHead>Date</TableHead>
                       <TableHead>Models Used</TableHead>
                       <TableHead className="text-right">Score</TableHead>
-                      <TableHead className="text-right">Trend</TableHead>
-                      <TableHead className="w-28"></TableHead>
+                      <TableHead className="w-40"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {reports.map((report, index) => {
-                      const trend = getScoreTrend(index);
                       return (
                         <TableRow key={report.id}>
                           <TableCell className="font-medium">#{report.iteration}</TableCell>
@@ -184,26 +183,22 @@ export default function Reports() {
                             {Math.round(report.overallScore * 100)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {trend && (
-                              <div className={cn("flex items-center justify-end gap-1", trend.color)}>
-                                <trend.icon className="w-4 h-4" />
-                                {trend.value !== 0 && (
-                                  <span className="text-sm">
-                                    {trend.value > 0 ? '+' : ''}{Math.round(trend.value * 100)}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell>
                             <Button 
-                              variant="ghost" 
+                              variant="default" 
                               size="sm"
-                              className="gap-1.5"
-                              onClick={() => navigate(`/report/${report.id}`)}
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                              onClick={() => {
+                                // Navigate to evaluation page with the report data loaded
+                                navigate('/evaluate', { 
+                                  state: { 
+                                    projectId: project.id,
+                                    reportId: report.id, // Pass report ID to load specific results
+                                    viewMode: 'report'   // Signal to show results immediately
+                                  } 
+                                });
+                              }}
                             >
-                              <Eye className="w-3.5 h-3.5" />
-                              View
+                              View Full Report
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -245,6 +240,6 @@ export default function Reports() {
           </div>
         )}
       </main>
-    </div>
+    </PageTransition>
   );
 }

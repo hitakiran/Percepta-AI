@@ -18,13 +18,15 @@ interface Step {
 }
 
 const steps: Step[] = [
-  { id: 1, label: "Product Input", icon: FileText },
-  { id: 2, label: "Golden Prompts", icon: MessageSquare },
-  { id: 3, label: "Model Selection", icon: Cpu },
-  { id: 4, label: "Generation", icon: Activity },
-  { id: 5, label: "Results", icon: BarChart3 },
-  { id: 6, label: "Gaps & Failures", icon: AlertTriangle },
-  { id: 7, label: "Fixes", icon: Lightbulb },
+  { id: 1, label: "Enter Product Info", icon: FileText },
+  { id: 2, label: "Review Source Trace", icon: Activity },
+  { id: 3, label: "Customize Questions", icon: MessageSquare },
+  { id: 4, label: "Set Scoring Rubric", icon: BarChart3 },
+  { id: 5, label: "Select Models", icon: Cpu },
+  { id: 6, label: "Watch Generation", icon: Activity },
+  { id: 7, label: "Review Results", icon: BarChart3 },
+  { id: 8, label: "Gaps & Failures", icon: AlertTriangle },
+  { id: 9, label: "Apply Fixes", icon: Lightbulb },
 ];
 
 interface EvaluationSidebarProps {

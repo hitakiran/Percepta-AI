@@ -1,201 +1,309 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Search, BarChart3, Lightbulb, ArrowRight, CheckCircle2, Target, Eye, Zap, FileSearch, MessageSquare, TrendingUp } from "lucide-react";
+import { Eye, Target, Lightbulb, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
+import { motion } from "framer-motion";
+import { LiquidChrome } from "@/components/ui/LiquidChrome";
 
 export default function Landing() {
   const navigate = useNavigate();
 
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.8, ease: "easeOut" }
+    }
+  } as const;
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  } as const;
+
   return (
-    <div className="min-h-screen bg-gradient-surface">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-gray-200 relative">
+      <LiquidChrome />
+
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 pt-20 pb-24 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
-              <Brain className="w-4 h-4" />
-              AI Perception Measurement Platform
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-              Measure your product's
-              <br />
-              <span className="text-gradient">AI perception</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              <strong>Percepta AI</strong> shows you exactly how AI systems describe your product to potential buyers—and what to fix when they get it wrong.
-            </p>
+      <section className="relative pt-20 pb-16 lg:pt-28 lg:pb-24 px-6">
+        <motion.div 
+          className="max-w-[800px] mx-auto text-center"
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
+          <motion.div variants={fadeInUp} className="inline-block mb-4">
+            <span className="text-sm font-semibold tracking-wide uppercase text-muted-foreground/80">
+              AI Perception Measurement
+            </span>
+          </motion.div>
+          
+          <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight leading-[1.05]">
+            Measure your product's
+            <br />
+            AI perception.
+          </motion.h1>
+          
+          <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-muted-foreground/90 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+            Ensure AI models position your product correctly to investors and early adopters.
+          </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                onClick={() => navigate('/evaluate')}
-                className="h-14 px-8 text-base font-semibold bg-gradient-primary hover:opacity-90 shadow-glow"
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/auth')}
+              className="h-12 px-8 rounded-full text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300"
+            >
+              Start Evaluation
+            </Button>
+            <Button 
+              size="lg" 
+              variant="ghost"
+              onClick={() => navigate('/dashboard')}
+              className="h-12 px-8 rounded-full text-base font-medium text-primary border-2 border-transparent hover:border-primary hover:bg-black hover:text-white transition-all duration-300"
+            >
+              View Dashboard
+            </Button>
+          </motion.div>
+
+          {/* Scroll Indicator */}
+          <motion.div 
+            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.8 }}
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronDown className="w-6 h-6 text-muted-foreground/50" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Value Proposition - Clean Grid */}
+      <section className="py-16 bg-secondary/30 relative overflow-hidden">
+        {/* Animated Light Gray Background for this section */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-gray-50/50 to-gray-100/50">
+          <motion.div 
+            className="absolute inset-0 opacity-30"
+            animate={{ 
+              backgroundPosition: ["0% 0%", "100% 100%"],
+            }}
+            transition={{ 
+              duration: 20, 
+              repeat: Infinity, 
+              repeatType: "reverse" 
+            }}
+            style={{
+              backgroundImage: "radial-gradient(circle at center, #e5e7eb 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          />
+        </div>
+
+        <div className="container mx-auto px-6 max-w-6xl">
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8 lg:gap-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+          >
+            <motion.div 
+              variants={fadeInUp} 
+              className="text-center flex flex-col items-center space-y-4 p-8 rounded-2xl bg-white/40 backdrop-blur-sm border border-white/20 shadow-sm hover:shadow-md transition-all duration-500"
+              whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="p-4 bg-white rounded-full mb-2 shadow-sm"
               >
-                Start Evaluation
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => navigate('/dashboard')}
-                className="h-14 px-8 text-base font-semibold"
+                <Eye className="w-8 h-8 text-foreground" strokeWidth={1.5} />
+              </motion.div>
+              <h3 className="text-xl font-bold tracking-tight">See AI Perception</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Ask AI models buyer-style questions and see exactly what they say—as an uninformed potential customer would.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeInUp} 
+              className="text-center flex flex-col items-center space-y-4 p-8 rounded-2xl bg-white/40 backdrop-blur-sm border border-white/20 shadow-sm hover:shadow-md transition-all duration-500"
+              whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="p-4 bg-white rounded-full mb-2 shadow-sm"
               >
-                View Dashboard
-              </Button>
-            </div>
-          </div>
+                <Target className="w-8 h-8 text-foreground" strokeWidth={1.5} />
+              </motion.div>
+              <h3 className="text-xl font-bold tracking-tight">Identify Gaps</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Spot missing information, incorrect descriptions, and hallucinated content that hurts your positioning.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeInUp} 
+              className="text-center flex flex-col items-center space-y-4 p-8 rounded-2xl bg-white/40 backdrop-blur-sm border border-white/20 shadow-sm hover:shadow-md transition-all duration-500"
+              whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="p-4 bg-white rounded-full mb-2 shadow-sm"
+              >
+                <Lightbulb className="w-8 h-8 text-foreground" strokeWidth={1.5} />
+              </motion.div>
+              <h3 className="text-xl font-bold tracking-tight">Get Fixes</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Receive specific, actionable recommendations to improve your product context and roadmap communication.
+              </p>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* What It Does */}
-      <section className="py-20 bg-card border-y">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Percepta AI Does</h2>
-            <p className="text-lg text-muted-foreground">
-              A B2B tool that audits how AI models perceive your product—and gives you a clear roadmap to improve it.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-8 pb-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                  <Eye className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">See AI Perception</h3>
-                <p className="text-muted-foreground text-sm">
-                  Ask AI models buyer-style questions about your product and see exactly what they say—as an uninformed potential customer would.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-8 pb-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                  <Target className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Identify Gaps</h3>
-                <p className="text-muted-foreground text-sm">
-                  Spot missing information, incorrect descriptions, weak differentiators, and hallucinated content that hurts your positioning.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-8 pb-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                  <Lightbulb className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Get Fixes</h3>
-                <p className="text-muted-foreground text-sm">
-                  Receive specific, actionable recommendations to improve your product context, explainability, positioning, and roadmap communication.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How Percepta AI Works</h2>
-            <p className="text-lg text-muted-foreground">
-              A structured, transparent evaluation process in 8 steps
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="grid gap-6">
-              {[
-                { step: 1, title: "Enter Product Info", desc: "Provide your website URL, competitors, and target persona", icon: FileSearch },
-                { step: 2, title: "Review Source Trace", desc: "See what public data was fetched and any uncertainties before proceeding", icon: Search },
-                { step: 3, title: "Customize Questions", desc: "Edit auto-generated questions specific to your product and competitors", icon: MessageSquare },
-                { step: 4, title: "Set Scoring Rubric", desc: "Define how responses are scored with an editable 0-3 point rubric", icon: BarChart3 },
-                { step: 5, title: "Select Models", desc: "Choose which AI models to query and set temperature", icon: Brain },
-                { step: 6, title: "Watch Generation", desc: "See live trace logs as models respond as uninformed buyers", icon: Zap },
-                { step: 7, title: "Review Results", desc: "Analyze responses with overall scores and detailed rubric views", icon: Eye },
-                { step: 8, title: "Apply Fixes", desc: "Get grouped recommendations to improve your AI perception", icon: TrendingUp },
-              ].map((item) => (
-                <div key={item.step} className="flex gap-4 items-start">
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">
-                    {item.step}
-                  </div>
-                  <div className="pt-1 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{item.title}</h3>
-                    </div>
-                    <p className="text-muted-foreground text-sm">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why It's Useful */}
-      <section className="py-20 bg-card border-y">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Your Business Needs Percepta AI</h2>
-            <p className="text-lg text-muted-foreground">
-              AI tools are shaping how buyers discover and evaluate products—often before they ever visit your website
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+      {/* Process Section - Minimal List */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-3xl md:text-4xl font-bold mb-12 text-center tracking-tight"
+          >
+            How it works
+          </motion.h2>
+          
+          <div className="space-y-12">
             {[
-              "Product teams can't control how AI describes their product",
-              "AI responses influence buying decisions before users visit your site",
-              "Incorrect positioning means lost opportunities to competitors",
-              "Outdated information erodes trust in your brand",
-              "Missing features in AI responses hurt conversions",
-              "Competitors may be better represented in AI outputs",
-            ].map((point, i) => (
-              <div key={i} className="flex items-start gap-3 p-4 rounded-lg bg-secondary/50">
-                <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm">{point}</span>
-              </div>
+              { step: "01", title: "Enter Product Info", desc: "Provide your website URL, competitors, and target persona." },
+              { step: "02", title: "Review Source Trace", desc: "See what public data was fetched and any uncertainties." },
+              { step: "03", title: "Approve Golden Prompts", desc: "Review and customize the questions AI will ask." },
+              { step: "04", title: "Define Scoring Rubric", desc: "Set the criteria for how responses should be evaluated." },
+              { step: "05", title: "Select Models", desc: "Choose which AI models to query (GPT-4, Gemini, etc.)." },
+              { step: "06", title: "Watch Generation", desc: "See live trace logs as models respond as uninformed buyers." },
+              { step: "07", title: "Review Results", desc: "Analyze responses with overall scores and detailed rubric views." },
+              { step: "08", title: "Identify Gaps", desc: "Spot missing or incorrect information affecting perception." },
+              { step: "09", title: "Apply Fixes", desc: "Get actionable recommendations to improve your product context." },
+            ].map((item, i) => (
+              <motion.div 
+                key={i} 
+                className="flex flex-col items-center text-center group relative"
+                initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.1, type: "spring", stiffness: 100 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="mb-4 relative">
+                  <span className="text-4xl font-bold text-muted-foreground/10 absolute -top-8 left-1/2 -translate-x-1/2 scale-150 blur-[1px] select-none">
+                    {item.step}
+                  </span>
+                  <span className="text-sm font-mono font-medium text-primary bg-primary/5 px-3 py-1 rounded-full border border-primary/10 relative z-10">
+                    Step {item.step}
+                  </span>
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-3 tracking-tight">{item.title}</h3>
+                <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">{item.desc}</p>
+                
+                {i !== 8 && (
+                  <motion.div 
+                    className="h-12 w-px bg-gradient-to-b from-border to-transparent mt-8"
+                    initial={{ height: 0, opacity: 0 }}
+                    whileInView={{ height: 48, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                  />
+                )}
+                
+                {/* Side animations */}
+                <motion.div
+                  className="absolute left-[-100px] top-1/2 -translate-y-1/2 w-32 h-32 bg-gray-100/50 rounded-full blur-3xl -z-10"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, duration: 1 }}
+                />
+                <motion.div
+                  className="absolute right-[-100px] top-1/2 -translate-y-1/2 w-32 h-32 bg-gray-200/30 rounded-full blur-3xl -z-10"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4, duration: 1 }}
+                />
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to measure your AI perception?
+      {/* Problem Statement - Text Only */}
+      <section className="py-16 bg-primary text-primary-foreground">
+        <motion.div 
+          className="container mx-auto px-6 max-w-4xl text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+        >
+          <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold mb-8 tracking-tight leading-tight">
+            AI search is the new SEO.
+            <br />
+            <span className="opacity-70">Don't let hallucinations kill your momentum.</span>
+          </motion.h2>
+          <motion.div 
+            variants={fadeInUp}
+            className="grid sm:grid-cols-2 gap-x-12 gap-y-6 text-left max-w-2xl mx-auto mt-8 opacity-90"
+          >
+            <p className="leading-relaxed">Investors use AI to research your market fit before the first call.</p>
+            <p className="leading-relaxed">Incorrect positioning confuses your initial target market.</p>
+            <p className="leading-relaxed">Early adopters rely on AI summaries to compare you against incumbents.</p>
+            <p className="leading-relaxed">Competitors with longer history drown out your new narrative.</p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Minimal CTA */}
+      <section className="py-20 text-center px-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">
+            Ready to measure?
           </h2>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-            See exactly how AI understands your product and get actionable fixes in minutes.
-          </p>
           <Button 
             size="lg" 
-            onClick={() => navigate('/evaluate')}
-            className="h-14 px-10 text-base font-semibold bg-gradient-primary hover:opacity-90 shadow-glow"
+            onClick={() => navigate('/auth')}
+            className="h-14 px-12 rounded-full text-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-transform duration-300 hover:scale-105"
           >
             Start Your Free Evaluation
-            <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
-        </div>
+        </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p><strong>Percepta AI</strong> • AI Product Perception Measurement Platform</p>
+      <footer className="py-8 border-t border-border/40">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-sm text-muted-foreground/60 font-medium">Percepta AI</p>
         </div>
       </footer>
     </div>

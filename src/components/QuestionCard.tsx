@@ -45,7 +45,7 @@ export function QuestionCard({ response, index }: QuestionCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="p-3 bg-secondary/50 rounded-lg">
-          <p className="text-sm text-foreground leading-relaxed">{response.response}</p>
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{response.response}</p>
         </div>
 
         <div className="grid grid-cols-3 gap-3">

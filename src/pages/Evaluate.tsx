@@ -18,6 +18,7 @@ import { getProjects, saveProject, saveReport, getProjectReports } from "@/lib/s
 import { supabase } from "@/integrations/supabase/client";
 import { runPerceptionAudit } from "@/lib/audit-service";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
 import type { 
   Project, 
   GoldenPrompt, 
@@ -37,6 +38,8 @@ export default function Evaluate() {
   const navigate = useNavigate();
   const location = useLocation();
   const existingProjectId = location.state?.projectId;
+  const viewReportId = location.state?.reportId;
+  const viewMode = location.state?.viewMode;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [maxAccessibleStep, setMaxAccessibleStep] = useState(1);
@@ -58,9 +61,9 @@ export default function Evaluate() {
     description: "",
     competitors: [],
     targetPersona: {
-      role: "Product Manager",
-      teamType: "Product",
-      companySize: "Medium (51-200)",
+      role: "",
+      teamType: "",
+      companySize: "",
     },
   });
 
@@ -90,7 +93,7 @@ export default function Evaluate() {
   const [report, setReport] = useState<EvaluationReport | null>(null);
   const [overallScore, setOverallScore] = useState(0);
 
-  // Load existing project if rerunning
+  // Load existing project and potentially a specific report
   useEffect(() => {
     if (existingProjectId) {
       const projects = getProjects();
@@ -109,9 +112,30 @@ export default function Evaluate() {
             companySize: "Medium (51-200)",
           },
         });
+
+        // If viewing a specific report, load it and jump to results
+        if (viewReportId && viewMode === 'report') {
+            const reports = getProjectReports(existingProjectId);
+            const targetReport = reports.find(r => r.id === viewReportId);
+            
+            if (targetReport) {
+                setResults(targetReport.questionResults);
+                setGaps(targetReport.gaps);
+                setFixes(targetReport.fixes);
+                setOverallScore(targetReport.overallScore);
+                setReport(targetReport);
+                setTraceLogs(targetReport.traceLogs);
+                setSourceFetches(targetReport.sourceFetches || []);
+                setUncertainties(targetReport.uncertainties || []);
+                
+                // Set step to 7 (Results) and allow access
+                setCurrentStep(7);
+                setMaxAccessibleStep(9);
+            }
+        }
       }
     }
-  }, [existingProjectId]);
+  }, [existingProjectId, viewReportId, viewMode]);
 
   const addTraceLog = (log: Omit<TraceLog, 'id' | 'timestamp'>) => {
     const newLog: TraceLog = {
@@ -217,6 +241,7 @@ export default function Evaluate() {
         competitors: productData.competitors.join(', '),
         targetPersona: `${productData.targetPersona.role} at a ${productData.targetPersona.companySize} ${productData.targetPersona.teamType} team`,
         customPrompts: enabledPrompts.map(p => ({ question: p.question, theme: p.theme })),
+        models: enabledModels,
       });
 
       if (error) {
@@ -261,19 +286,24 @@ export default function Evaluate() {
         questionId: `q-${idx}`,
         question: qr.question,
         theme: qr.questionType,
-        modelResponses: enabledModels.map((model) => ({
-          modelId: model.id,
-          modelName: model.name,
-          response: qr.response,
-          score: (qr.scores.accuracy + qr.scores.featureCoverage + qr.scores.differentiationClarity) / 3,
-          metricScores: metrics.map(m => ({
-            metricId: m.id,
-            metricName: m.name,
-            score: Math.floor(Math.random() * 4), // 0-3
-            reasoning: `Based on the response content analysis for ${m.name.toLowerCase()}.`,
-          })),
-          rubricDetails: `Attribution: ${Math.floor(qr.scores.accuracy * 3)}/3, Accuracy: ${Math.floor(qr.scores.featureCoverage * 3)}/3, Differentiation: ${Math.floor(qr.scores.differentiationClarity * 3)}/3`,
-        })),
+        modelResponses: enabledModels.map((model) => {
+          const specificResponse = qr.responsesByModel?.[model.id];
+          const responseText = specificResponse ? specificResponse.response : qr.response;
+
+          return {
+            modelId: model.id,
+            modelName: model.name,
+            response: responseText,
+            score: (qr.scores.accuracy + qr.scores.featureCoverage + qr.scores.differentiationClarity) / 3,
+            metricScores: metrics.map(m => ({
+              metricId: m.id,
+              metricName: m.name,
+              score: Math.floor(Math.random() * 4), // 0-3
+              reasoning: `Based on the response content analysis for ${m.name.toLowerCase()}.`,
+            })),
+            rubricDetails: `Attribution: ${Math.floor(qr.scores.accuracy * 3)}/3, Accuracy: ${Math.floor(qr.scores.featureCoverage * 3)}/3, Differentiation: ${Math.floor(qr.scores.differentiationClarity * 3)}/3`,
+          };
+        }),
       }));
 
       // Transform gaps with business impact
@@ -425,104 +455,116 @@ export default function Evaluate() {
         />
         
         <main className="flex-1 p-6 lg:p-8 overflow-auto">
-          {currentStep === 1 && (
-            <Step1ProductInput
-              data={productData}
-              onChange={setProductData}
-              onNext={handleStep1Next}
-            />
-          )}
-          
-          {currentStep === 2 && (
-            <Step2SourceTrace
-              productName={productData.name}
-              websiteUrl={productData.websiteUrl}
-              docsUrl={productData.docsUrl}
-              pricingUrl={productData.pricingUrl}
-              sourceFetches={sourceFetches}
-              uncertainties={uncertainties}
-              isLoading={isLoadingSources}
-              onNext={goToNextStep}
-              onBack={goToPrevStep}
-            />
-          )}
-          
-          {currentStep === 3 && (
-            <Step3GoldenPrompts
-              prompts={prompts}
-              productName={productData.name}
-              competitors={productData.competitors}
-              onPromptsChange={setPrompts}
-              onNext={goToNextStep}
-              onBack={goToPrevStep}
-            />
-          )}
-          
-          {currentStep === 4 && (
-            <Step4ScoringRubric
-              metrics={metrics}
-              onMetricsChange={setMetrics}
-              onNext={goToNextStep}
-              onBack={goToPrevStep}
-            />
-          )}
-          
-          {currentStep === 5 && (
-            <Step5ModelSelection
-              models={models}
-              onModelsChange={setModels}
-              onNext={handleStep5Next}
-              onBack={goToPrevStep}
-            />
-          )}
-          
-          {currentStep === 6 && (
-            <div className="space-y-6">
-              <Step4Generation
-                traceLogs={traceLogs}
-                isComplete={generationComplete}
-                productName={productData.name}
-              />
-              {generationComplete && (
-                <div className="max-w-4xl mx-auto">
-                  <Button 
-                    onClick={goToNextStep}
-                    className="w-full h-11 gap-2 bg-gradient-primary hover:opacity-90"
-                  >
-                    View Results
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="h-full"
+            >
+              {currentStep === 1 && (
+                <Step1ProductInput
+                  data={productData}
+                  onChange={setProductData}
+                  onNext={handleStep1Next}
+                />
+              )}
+              
+              {currentStep === 2 && (
+                <Step2SourceTrace
+                  productName={productData.name}
+                  websiteUrl={productData.websiteUrl}
+                  docsUrl={productData.docsUrl}
+                  pricingUrl={productData.pricingUrl}
+                  sourceFetches={sourceFetches}
+                  uncertainties={uncertainties}
+                  isLoading={isLoadingSources}
+                  onNext={goToNextStep}
+                  onBack={goToPrevStep}
+                />
+              )}
+              
+              {currentStep === 3 && (
+                <Step3GoldenPrompts
+                  prompts={prompts}
+                  productName={productData.name}
+                  competitors={productData.competitors}
+                  onPromptsChange={setPrompts}
+                  onNext={goToNextStep}
+                  onBack={goToPrevStep}
+                />
+              )}
+              
+              {currentStep === 4 && (
+                <Step4ScoringRubric
+                  metrics={metrics}
+                  onMetricsChange={setMetrics}
+                  onNext={goToNextStep}
+                  onBack={goToPrevStep}
+                />
+              )}
+              
+              {currentStep === 5 && (
+                <Step5ModelSelection
+                  models={models}
+                  onModelsChange={setModels}
+                  onNext={handleStep5Next}
+                  onBack={goToPrevStep}
+                />
+              )}
+              
+              {currentStep === 6 && (
+                <div className="space-y-6">
+                  <Step4Generation
+                    traceLogs={traceLogs}
+                    isComplete={generationComplete}
+                    productName={productData.name}
+                  />
+                  {generationComplete && (
+                    <div className="max-w-4xl mx-auto">
+                      <Button 
+                        onClick={goToNextStep}
+                        className="w-full h-11 gap-2 bg-gradient-primary hover:opacity-90"
+                      >
+                        View Results
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
-          
-          {currentStep === 7 && (
-            <Step5Results
-              results={results}
-              metrics={metrics}
-              overallScore={overallScore}
-              onNext={goToNextStep}
-              onBack={goToPrevStep}
-            />
-          )}
-          
-          {currentStep === 8 && (
-            <Step6Gaps
-              gaps={gaps}
-              onNext={goToNextStep}
-              onBack={goToPrevStep}
-            />
-          )}
-          
-          {currentStep === 9 && report && (
-            <Step7Fixes
-              fixes={fixes}
-              report={report}
-              onBack={goToPrevStep}
-              onFinish={handleFinish}
-            />
-          )}
+              
+              {currentStep === 7 && (
+                <Step5Results
+                  results={results}
+                  metrics={metrics}
+                  overallScore={overallScore}
+                  summary={report?.summary || "Summary generation in progress or failed."}
+                  onNext={goToNextStep}
+                  onBack={goToPrevStep}
+                />
+              )}
+              
+              {currentStep === 8 && (
+                <Step6Gaps
+                  gaps={gaps}
+                  onNext={goToNextStep}
+                  onBack={goToPrevStep}
+                />
+              )}
+              
+              {currentStep === 9 && report && (
+                <Step7Fixes
+                  fixes={fixes}
+                  report={report}
+                  onBack={goToPrevStep}
+                  onFinish={handleFinish}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

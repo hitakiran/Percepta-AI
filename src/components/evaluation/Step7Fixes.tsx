@@ -64,25 +64,6 @@ export function Step7Fixes({ fixes, report, onBack, onFinish }: Step7Props) {
         </p>
       </div>
 
-      {/* Summary Card */}
-      <Card className="mb-8 overflow-hidden">
-        <div className="bg-gradient-primary p-6 text-primary-foreground">
-          <h2 className="text-xl font-bold mb-1">Evaluation Complete</h2>
-          <p className="text-sm opacity-80">{report.projectName} • Iteration #{report.iteration}</p>
-        </div>
-        <CardContent className="p-6">
-          <div className="grid md:grid-cols-[1fr_auto] gap-6">
-            <div>
-              <h3 className="font-semibold mb-2">Summary</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{report.summary}</p>
-            </div>
-            <div className="flex justify-center">
-              <ScoreGauge score={report.overallScore} label="Overall Score" size="lg" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Fixes by Category */}
       <div className="space-y-6 mb-8">
         {Object.entries(groupedFixes).map(([category, categoryFixes]) => {

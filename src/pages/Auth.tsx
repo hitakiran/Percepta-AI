@@ -8,6 +8,7 @@ import { Brain, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { saveUser } from "@/lib/storage";
 import { toast } from "sonner";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function Auth() {
     });
     
     toast.success("Welcome back!");
-    navigate('/dashboard');
+    navigate('/evaluate');
     setIsLoading(false);
   };
 
@@ -59,12 +60,12 @@ export default function Auth() {
     });
     
     toast.success("Account created successfully!");
-    navigate('/dashboard');
+    navigate('/evaluate');
     setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex flex-col">
+    <PageTransition className="min-h-screen bg-gradient-surface flex flex-col">
       {/* Header */}
       <header className="p-4">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -208,6 +209,6 @@ export default function Auth() {
           </p>
         </div>
       </main>
-    </div>
+    </PageTransition>
   );
 }

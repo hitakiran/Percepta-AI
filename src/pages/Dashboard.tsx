@@ -9,6 +9,7 @@ import { getProjects, deleteProject } from "@/lib/storage";
 import type { Project } from "@/types/project";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface">
+    <PageTransition className="min-h-screen bg-gradient-surface">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
@@ -127,7 +128,7 @@ export default function Dashboard() {
                       }}
                     >
                       <History className="w-3.5 h-3.5" />
-                      Reports
+                      View History
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -144,6 +145,6 @@ export default function Dashboard() {
           </div>
         )}
       </main>
-    </div>
+    </PageTransition>
   );
 }

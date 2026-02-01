@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { User, Bell, Save, Check } from "lucide-react";
 import { getUser, saveUser } from "@/lib/storage";
 import { toast } from "sonner";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function Settings() {
   const [user, setUser] = useState(getUser());
@@ -31,7 +32,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface">
+    <PageTransition className="min-h-screen bg-gradient-surface">
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-3xl">
@@ -122,6 +123,6 @@ export default function Settings() {
           </Card>
         </div>
       </main>
-    </div>
+    </PageTransition>
   );
 }
