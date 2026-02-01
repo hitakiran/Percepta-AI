@@ -23,8 +23,8 @@ interface AuditInput {
   model?: string;
 }
 
-const SUPPORTED_MODELS = ["gpt-4o-mini", "gpt-5-mini"];
-const DEFAULT_MODEL = "gpt-5-mini";
+const SUPPORTED_MODELS = ["openai/gpt-4o-mini", "openai/gpt-5-mini"];
+const DEFAULT_MODEL = "openai/gpt-5-mini";
 
 async function queryAI(prompt: string, apiKey: string, model: string = DEFAULT_MODEL): Promise<string> {
   const response = await fetch("https://api.keywordsai.co/api/chat/completions", {

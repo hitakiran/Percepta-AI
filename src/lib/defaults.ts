@@ -43,8 +43,8 @@ export const DEFAULT_SCORING_METRICS: ScoringMetric[] = [
 ];
 
 export const AVAILABLE_MODELS: ModelConfig[] = [
-  { id: 'gpt-5-mini', name: 'GPT-5 Mini', provider: 'OpenAI', enabled: true, temperature: 0.7 },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', enabled: false, temperature: 0.7 },
+  { id: 'openai/gpt-5-mini', name: 'GPT-5 Mini', provider: 'OpenAI', enabled: true, temperature: 0.7 },
+  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', provider: 'OpenAI', enabled: false, temperature: 0.7 },
 ];
 
 // Helper to generate questions based on product info
